@@ -6,6 +6,7 @@ from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+
 from jinja2 import Template
 
 try:
@@ -35,8 +36,8 @@ except Exception as error:
     raise Exception(" Could not connect to SMTP server")
 
 people_data = [
-    {"guestName": "Mrs Priya Ravikumar", "email": "ravi.sivaraj@gmail.com", "adultNos": 2, "kidsNos": 2,
-     "voluntaryPrice": 100, "uniqueRef": "PR001"},
+    {"guestName": "Mrs Priya Ravikumar", "email": "priyaravikumar2000@yahoo.com", "adultNos": 2, "kidsNos": 2,
+     "voluntaryPrice": 100, "raffle": 5, "uniqueRef": "PR1"},
     # {"guestName": "Jane Smith", "email": "ravi.sivaraj@gmail.com", "adultNos": 2, "kidsNos": 0,
     #  "voluntaryPrice": 0, "uniqueRef": "JS001"},
     # {"guestName": "Bob Johnson", "email": "ravi.sivaraj@gmail.com",
@@ -44,21 +45,31 @@ people_data = [
     #  },
 ]
 
-subject = "Dance Beatz Charity Bollywood Event"
+subject = "Dance Beatz Charity Dance Show 2025"
+adultCost = 12
+kidsCost = 6
+raffleCost = 1
 # Now we iterate over our data to generate and send custom emails to each
 for person in people_data:
-    kidsPrice = person["kidsNos"] * 6
-    adultsPrice = person["adultNos"] * 12
+    kidsPrice = person["kidsNos"] * kidsCost
+    adultsPrice = person["adultNos"] * adultCost
     voluntaryPrice = person["voluntaryPrice"]
-    totalPrice = kidsPrice + adultsPrice + voluntaryPrice
+    raffle = person["raffle"] * raffleCost
+    totalPrice = kidsPrice + adultsPrice + raffle #  + voluntaryPrice
+    uniqueRef = (person["uniqueRef"]+"A"+str(person["adultNos"])+"K"+str(person["kidsNos"])+"R"+str(person["raffle"]))
+    #   +"V"+str(person["voluntaryPrice"]))
     # Create email content using Jinja2 template
     email_data = {
         "guestName": person["guestName"],
         "adultNos": person["adultNos"],
         "kidsNos": person["kidsNos"],
-        "adultsPrice": adultsPrice,
+        "adultCost": adultCost,
+        "kidsCost": kidsCost,
+        "raffleCost": raffleCost,
+        "adultPrice": adultsPrice,
         "voluntaryPrice": voluntaryPrice,
-        "uniqueRef": person["uniqueRef"],
+        "uniqueRef": uniqueRef,
+        "rafflePrice": person["raffle"],
         "kidsPrice": kidsPrice,
         "totalPrice": totalPrice,
     }
@@ -87,3 +98,6 @@ for person in people_data:
 
 # Close the server connection
 smtp_object.quit()
+
+
+
