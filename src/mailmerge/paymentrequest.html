@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table, th, td {
+  border-collapse: collapse;
+     padding: 1px;
+}
+tr {
+  height: 1px
+}
+
+</style>
+</head>
+<body>
+<p>Dear {{ guestName }}</p>
+<p>We would like to express our deep and heartfelt thanks for your interest in the DanceBeatz Charity Show 2025. <p></p>
+<em>It
+    will be an afternoon of fabulous music and dance and we will keep you fully entertained. </em></p>
+
+<p><strong>All </strong>the proceeds of the event will be shared between two desperate charities - The Braidburn School,
+    Edinburgh and Our Lady Health Trust, India.</p>
+
+<p>Please find below the payment instructions for the event. We request you&nbsp;<strong>take a moment to check that we
+    have your details correct</strong>&nbsp;and do let us know if you have any queries.</p>
+<p><strong><u>Dance Beatz Charity Bollywood Dance Show 2025</u></strong></p>
+<p><strong>Date:</strong>&nbsp; Saturday, 14<sup>th</sup> of June 2025<br/> Edinburgh College (Granton Campus), 350 West
+    Granton Rd, Edinburgh, &nbsp;EH5 1QE<br/></p>
+<table width="623">
+    <tbody>
+    <tr>
+        <td width="177">
+
+        </td>
+        <td width="128">
+            <strong>Nos.</strong>
+        </td>
+        <td width="126">
+            <strong>Cost</strong>
+        </td>
+        <td width="192">
+            <strong>Total</strong>
+        </td>
+    </tr>
+    <tr>
+        <td width="177">
+            Adults (16+ years)
+        </td>
+        <td width="128">
+            <p>{{ adultNos }} &nbsp;</p>
+        </td>
+        <td width="126">
+            <p>{{ adultsPrice }}</p>
+        </td>
+        <td width="192">
+            <p>&pound;{{ adultsPrice }}</p>
+        </td>
+    </tr>
+    <tr>
+        <td width="177">
+            <p>Children (5 to 15 years)</p>
+        </td>
+        <td width="128">
+            <p>{{ kidsNos }}</p>
+        </td>
+        <td width="126">
+            <p>{{ kidsPrice }}</p>
+        </td>
+        <td width="192">
+            <p>&pound;{{ kidsPrice }}</p>
+        </td>
+    </tr>
+    <tr>
+        <td width="177">
+            <p>&nbsp;Voluntary Contribution</p>
+        </td>
+        <td width="128">
+
+        </td>
+        <td width="126">
+
+        </td>
+        <td width="192">
+            <p>&pound;{{ voluntaryPrice }}</p>
+        </td>
+    </tr>
+    <tr>
+        <td width="177">
+            <p>Total</p>
+        </td>
+        <td width="128">
+
+        </td>
+        <td width="126">
+
+        </td>
+        <td width="192">
+            <p><strong>&pound;{{ totalPrice }}</strong></p>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<table width="595">
+    <tbody>
+    <tr>
+        <td width="556">
+
+            <p>If the above details are correct, could you please transfer the amount <strong>&pound;{{ totalPrice
+                }}</strong> to the following account with your reference number  <strong>{ {{ uniqueRef
+                }}</strong><strong>
+                }</strong></p>
+
+            <table width="403">
+                <tbody>
+                <tr>
+                    <td width="135">
+                        <p>Account Name:</p>
+                    </td>
+                    <td width="262">
+                        <p>DanceBeatz</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="135">
+                        Bank:
+                    </td>
+                    <td width="262">
+                        <p><strong>Royal Bank of Scotland</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="135">
+                        <p>Sort Code:</p>
+                    </td>
+                    <td width="262">
+                        <p><strong>83-06-08</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="135">
+                        <p>Account Number:</p>
+                    </td>
+                    <td width="262">
+                        <p><strong>21062920&nbsp;</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="135">
+                        <p>Your Reference:</p>
+                    </td>
+                    <td width="262">
+                        <p><strong>{{ uniqueRef }}</strong></p>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+        <td width="6">
+
+        </td>
+        <td width="3">
+
+        </td>
+        <td width="10">
+            <p><strong>&nbsp;</strong></p>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<p><strong>அன்புடன்</strong><strong>&nbsp; /&nbsp;</strong><strong>Best Regards&nbsp;</strong></p>
+</body>
+</html>
