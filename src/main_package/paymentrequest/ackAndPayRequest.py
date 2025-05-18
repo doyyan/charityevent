@@ -1,16 +1,41 @@
+import shutil
+from _datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+import pandas as pd
 from jinja2 import Template
 
 from src.main_package.emailer.emailClient import sendEmail
 from src.main_package.loggers.logger import createLogger
 
 
-def sendAckAndPayRequest(people_data, templateName):
-    logFile, errorFile = createLogger()
+def sendAckAndPayRequest(templateName, processedXlsFile):
+    currentDateTime = datetime.now()
+    shutil.copy(processedXlsFile, '../mainExcelFiles/DanceBeatz2025ProcessedCopy'
+                + currentDateTime.strftime("%Y%m%d%H%M%S")
+                + '.xlsx')
 
+    logFile, errorFile = createLogger()
+    form = pd.read_excel(processedXlsFile)
     adminEmail = "ravi.sivaraj@gmail.com"
+
+    # people_data = [
+    #     {"guestName": "Mrs Priya Ravikumar", "email": "priyaravikumar2000@yahoo.com", "adultNos": 2, "kidsNos": 2,
+    #      "voluntaryPrice": 100, "raffle": 5, "uniqueRef": "PR1"},
+    #     # {"guestName": "Jane Smith", "email": "ravi.sivaraj@gmail.com", "adultNos": 2, "kidsNos": 0,
+    #     #  "voluntaryPrice": 0, "uniqueRef": "JS001"},
+    #     # {"guestName": "Bob Johnson", "email": "ravi.sivaraj@gmail.com",
+    #     #  "adultNos": 0, "kidsNos": 2, "voluntaryPrice": 100, "uniqueRef": "JD001"
+    #     #  },
+    # ]
+
+    emailHeaderField = 'Email'
+    guestNameField = 'Guest name'
+    noOfAdultsField = 'Number of Adults (£12)'
+    raffleField = "I'd like to win one of the Great prizes on offer for the Raffle, please can I buy the following Number of tickets (£2 each)"
+    noOfKidsField = 'Number of Children aged 5 and above (£6)'
+    acknowledgedField = 'Acknowledged'
 
     # Read the Jinja2 email template
     with open(templateName, "r") as file:
@@ -21,44 +46,59 @@ def sendAckAndPayRequest(people_data, templateName):
     adultCost = 12
     kidsCost = 6
     raffleCost = 1
+
+    form.fillna(value="", axis=1, inplace=True)
+
     # Now we iterate over our data to generate and send custom emails to each
-    for person in people_data:
-        kidsPrice = person["kidsNos"] * kidsCost
-        adultsPrice = person["adultNos"] * adultCost
-        voluntaryPrice = person["voluntaryPrice"]
-        raffle = person["raffle"] * raffleCost
-        totalPrice = kidsPrice + adultsPrice + raffle  # + voluntaryPrice
-        uniqueRef = (person["uniqueRef"] + "A" + str(person["adultNos"]) + "K" + str(person["kidsNos"]) + "R" + str(
-            person["raffle"]))
-        #   +"V"+str(person["voluntaryPrice"]))
-        # Create email content using Jinja2 template
-        email_data = {
-            "guestName": person["guestName"],
-            "adultNos": person["adultNos"],
-            "kidsNos": person["kidsNos"],
-            "adultCost": adultCost,
-            "kidsCost": kidsCost,
-            "raffleCost": raffleCost,
-            "adultPrice": adultsPrice,
-            "voluntaryPrice": voluntaryPrice,
-            "uniqueRef": uniqueRef,
-            "rafflePrice": person["raffle"],
-            "kidsPrice": kidsPrice,
-            "totalPrice": totalPrice,
-        }
-        email_content = jinja_template.render(email_data)
+    for i, person in form.iterrows():
+        # Only Process if a Payment Ref has NOT been emailed!
+        print(str(person[acknowledgedField]))
+        if (person[acknowledgedField] == ""):
+            kidsPrice = person[noOfKidsField] * kidsCost
+            adultsPrice = person[noOfAdultsField] * adultCost
+            # voluntaryPrice = person["voluntaryPrice"]
+            raffle = person[raffleField] * raffleCost
+            indexWithNameSlice = person[guestNameField].upper()[:2] + str(i)
+            totalPrice = kidsPrice + adultsPrice + raffle  # + voluntaryPrice
+            uniqueRef = (indexWithNameSlice + "A" + str(person[noOfAdultsField]) + "K" + str(
+                person[noOfKidsField]) + "R" + str(
+                person[raffleField]))
+            #   +"V"+str(person["voluntaryPrice"]))
+            # Create email content using Jinja2 template
+            email_data = {
+                "guestName": person[guestNameField],
+                "adultNos": person[noOfAdultsField],
+                "kidsNos": person[noOfKidsField],
+                "adultCost": adultCost,
+                "kidsCost": kidsCost,
+                "raffleCost": raffleCost,
+                "adultPrice": adultsPrice,
+                # "voluntaryPrice": voluntaryPrice,
+                "uniqueRef": uniqueRef,
+                "rafflePrice": person[raffleField],
+                "kidsPrice": kidsPrice,
+                "totalPrice": totalPrice,
+            }
+            email_content = jinja_template.render(email_data)
 
-        # Create the email message
-        msg = MIMEMultipart()
-        msg["From"] = adminEmail
-        msg["To"] = person["email"]
-        msg["Subject"] = subject
+            # Create the email message
+            msg = MIMEMultipart()
+            msg["From"] = adminEmail
+            msg["To"] = person[emailHeaderField]
+            msg["Subject"] = subject
 
-        # Attach the HTML content to the email
-        msg.attach(MIMEText(email_content, "html"))
+            # Attach the HTML content to the email
+            msg.attach(MIMEText(email_content, "html"))
 
-        # Print and send the email
-        print(f"Sending email to {person['email']}:\n{email_content}\n\n")
-        logFile.write(f"Sending email to {person['email']}:\n{email_content}\n\n")
+            # Print and send the email
+            print(f"Sending email to {person[emailHeaderField]}:\n{email_content}\n\n")
+            logFile.write(f"Sending email to {person[emailHeaderField]}:\n{email_content}\n\n")
 
-        sendEmail(msg.as_string(), person['email'], adminEmail, errorFile)
+            sendSuccess = sendEmail(msg.as_string(), person[emailHeaderField], adminEmail, errorFile)
+
+            if (sendSuccess):
+                form.at[i, acknowledgedField] = currentDateTime
+
+    with pd.ExcelWriter(processedXlsFile, engine="openpyxl",
+                        mode="a", if_sheet_exists="replace") as writer:
+        form.to_excel(excel_writer=writer, sheet_name='Form Responses 1', index=False)

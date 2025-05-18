@@ -23,10 +23,11 @@ def sendEmail(data, email, adminEmail, errorFile):
     smtp_object = createSMTPServer()
     try:
         smtp_object.sendmail(adminEmail, email, data)
+        return True
     except Exception as error:
         # handle the exception
         print("An exception occurred:", type(error).__name__, "–", error)
         errorFile.write(" Could not send email to emailID: " + email + "\n")
-        raise Exception(" Could not send email to emailID: " + email + "\n")
+        return False
 
     smtp_object.quit()
