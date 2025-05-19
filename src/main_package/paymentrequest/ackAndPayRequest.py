@@ -36,6 +36,8 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
     raffleField = "I'd like to win one of the Great prizes on offer for the Raffle, please can I buy the following Number of tickets (£2 each)"
     noOfKidsField = 'Number of Children aged 5 and above (£6)'
     acknowledgedField = 'Acknowledged'
+    cancelledField = 'Cancelled'
+    paymentRefField = 'PaymentRef'
 
     # Read the Jinja2 email template
     with open(templateName, "r") as file:
@@ -53,7 +55,7 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
     for i, person in form.iterrows():
         # Only Process if a Payment Ref has NOT been emailed!
         print(str(person[acknowledgedField]))
-        if (person[acknowledgedField] == ""):
+        if (person[acknowledgedField] == "" and person[cancelledField] != 'Cancelled'):
             kidsPrice = person[noOfKidsField] * kidsCost
             adultsPrice = person[noOfAdultsField] * adultCost
             # voluntaryPrice = person["voluntaryPrice"]
@@ -98,6 +100,7 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
 
             if (sendSuccess):
                 form.at[i, acknowledgedField] = currentDateTime
+                form.at[i, paymentRefField] = uniqueRef
 
     with pd.ExcelWriter(processedXlsFile, engine="openpyxl",
                         mode="a", if_sheet_exists="replace") as writer:
