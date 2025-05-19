@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 import pandas as pd
 from jinja2 import Template
 
-from src.main_package.emailer.emailClient import sendEmail
+from src.main_package.emailer.emailClient import sendEmail, checkEmailIsValid
 from src.main_package.fileops.fileops import checkFileOpen
 from src.main_package.loggers.logger import createLogger
 
@@ -62,6 +62,10 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
         # Only Process if a Payment Ref has NOT been emailed!
         print(str(person[acknowledgedField]))
         if (person[acknowledgedField] == "" and person[cancelledField] != 'Cancelled'):
+            emailValid, mesg = checkEmailIsValid(person[emailHeaderField])
+            if not emailValid:
+                errorFile.write("email ID " + person[emailHeaderField] + " is INVALID")
+                continue
             kidsPrice = person[noOfKidsField] * kidsCost
             adultsPrice = person[noOfAdultsField] * adultCost
             # voluntaryPrice = person["voluntaryPrice"]

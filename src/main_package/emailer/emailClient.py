@@ -1,6 +1,18 @@
 import os
 import smtplib
 
+from email_validator import validate_email, EmailNotValidError
+
+
+def checkEmailIsValid(email):
+    try:
+        v = validate_email(email)
+        email = v["email"]
+        return True, email
+    except EmailNotValidError as e:
+        # email is not valid, exception message is human-readable
+        return False, str(e)
+
 
 def createSMTPServer():
     try:
