@@ -54,7 +54,7 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
         if (person[acknowledgedField] == "" and person[cancelledField] != 'Cancelled'):
             emailValid, mesg = checkEmailIsValid(person[emailHeaderField])
             if not emailValid:
-                errorFile.write("email ID " + person[emailHeaderField] + " is INVALID")
+                errorFile.write("email ID on Line" + str(i) + " is INVALID")
                 continue
             kidsPrice = person[noOfKidsField] * kidsCost
             adultsPrice = person[noOfAdultsField] * adultCost
