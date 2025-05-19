@@ -7,6 +7,7 @@ import pandas as pd
 from jinja2 import Template
 
 from src.main_package.emailer.emailClient import sendEmail
+from src.main_package.fileops.fileops import checkFileOpen
 from src.main_package.loggers.logger import createLogger
 
 
@@ -17,6 +18,11 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
                 + '.xlsx')
 
     logFile, errorFile = createLogger()
+
+    if checkFileOpen(processedXlsFile):
+        logFile.write(" File already open " + processedXlsFile)
+        raise Exception(" File already open " + processedXlsFile)
+
     form = pd.read_excel(processedXlsFile)
     adminEmail = "ravi.sivaraj@gmail.com"
 
