@@ -1,3 +1,4 @@
+import os
 import shutil
 from _datetime import datetime
 from email.mime.multipart import MIMEMultipart
@@ -24,7 +25,8 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
         raise Exception(" File already open " + processedXlsFile)
 
     form = pd.read_excel(processedXlsFile)
-    adminEmail = "dancebeatzedinburgh@gmail.com"
+    adminEmail = os.environ.get('ADMIN_EMAIL')
+    # "dancebeatzedinburgh@gmail.com"
 
     emailHeaderField = 'Email'
     guestNameField = 'Guest name'
