@@ -52,7 +52,6 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
     # Now we iterate over our data to generate and send custom emails to each
     for i, person in form.iterrows():
         # Only Process if a Payment Ref has NOT been emailed!
-        print(str(person[acknowledgedField]))
         if (person[acknowledgedField] == "" and person[cancelledField] != 'Cancelled'):
             emailValid, mesg = checkEmailIsValid(person[emailHeaderField])
             if not emailValid:
