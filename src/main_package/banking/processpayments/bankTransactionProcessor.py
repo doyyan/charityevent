@@ -44,7 +44,6 @@ def find_and_update_bank_transactions(processedXlsFile, bank_ref_data, current_s
     for i, bank_ref_data_row in bank_ref_data.iterrows():
         if bank_ref_data_row[transactionPaymentReferenceField] == "":
             continue
-        len = 0
         try:
             current_data = current_statement[bank_ref_data_row[transactionPaymentReferenceField]]
         except KeyError as e:
