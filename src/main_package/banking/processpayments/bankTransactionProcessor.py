@@ -29,12 +29,15 @@ def find_and_update_bank_transactions(processedXlsFile, bank_ref_data, current_s
     noOfAdultsField = 'Number of Adults (£12)'
     noOfKidsField = 'Number of Children aged 5 and above (£6)'
     paymentMismatchField = 'PaymentMismatch'
+    totalPaidField = 'TotalPaid'
 
     fuzzyMatchWanted = bank_ref_data[fuzzyMatchField][0]
     kidsTicketPrice = bank_ref_data[kidsTicketPriceField][0]
     adultTicketPrice = bank_ref_data[adultTicketPriceField][0]
 
     form = pd.read_excel(processedXlsFile)
+    form[totalPaidField].fillna(0)
+
     if checkFileOpen(processedXlsFile):
         logFile.write(" File already open " + processedXlsFile)
         raise Exception(" File already open " + processedXlsFile)
@@ -55,10 +58,15 @@ def find_and_update_bank_transactions(processedXlsFile, bank_ref_data, current_s
                 if fuzzyMatchWanted != "":
                     fuzzyMatchRatio = fuzz.ratio(form_row_value, statement_row_value)
                     if fuzzyMatchRatio >= fuzzyMatchWanted:
+                        totalPaidSoFar = 0
                         statementPaymentDate = statment_row[bank_ref_data_row[transactionPaymentDateField]]
                         statementAmount = statment_row[bank_ref_data_row[transactionPaymentAmountField]]
+                        if form_rows[paidDateField] != "" and form_rows[paidDateField] != statementPaymentDate:
+                            totalPaidSoFar = form_rows[totalPaidField] + statementAmount
+                        else:
+                            totalPaidSoFar = statementAmount
                         paidCorrectly = hasPaidCorrectAmount(
-                            totalPaid=statementAmount,
+                            totalPaid=totalPaidSoFar,
                             adults=form_rows[noOfAdultsField],
                             adultTicketPrice=adultTicketPrice,
                             kids=form_rows[noOfKidsField],
@@ -67,6 +75,7 @@ def find_and_update_bank_transactions(processedXlsFile, bank_ref_data, current_s
                         form.at[i, paidAmountField] = statementAmount
                         form.at[i, paidDateField] = statementPaymentDate
                         form.at[i, paymentMismatchField] = paidCorrectly
+                        form.at[i, totalPaidField] = totalPaidSoFar
                         rows_updated = rows_updated + 1
 
     if rows_updated > 0:
