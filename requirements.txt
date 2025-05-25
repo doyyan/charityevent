@@ -10,6 +10,7 @@ docx-mailmerge==0.5.0
 email_validator==2.2.0
 et_xmlfile==2.0.0
 executing==2.2.0
+fuzzywuzzy==0.18.0
 html5lib==1.1
 idna==3.10
 ipykernel==6.29.5
@@ -19,6 +20,7 @@ jedi==0.19.2
 Jinja2==3.1.6
 jupyter_client==8.6.3
 jupyter_core==5.7.2
+Levenshtein==0.27.1
 lxml==5.4.0
 mailmerge==2.2.4
 Markdown==3.8
@@ -38,8 +40,10 @@ ptyprocess==0.7.0
 pure_eval==0.2.3
 Pygments==2.19.1
 python-dateutil==2.9.0.post0
+python-Levenshtein==0.27.1
 pytz==2025.2
 pyzmq==26.4.0
+RapidFuzz==3.13.0
 setuptools==75.8.2
 six==1.17.0
 soupsieve==2.7
