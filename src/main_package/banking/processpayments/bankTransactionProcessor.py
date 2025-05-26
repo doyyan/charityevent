@@ -81,16 +81,19 @@ def find_and_update_bank_transactions(processedXlsFile, bank_ref_data, current_s
                             googleForm.at[i, paymentMismatchField] = paidCorrectly
                             googleForm.at[i, totalPaidField] = totalPaidSoFar
                             googleForm.at[i, closestMatchRatioField] = fuzzyMatchRatio
-                            googleForm.at[i, closestMatchField] = str(statement_row_value)
+                            googleForm.at[i, closestMatchField] = statment_row[
+                                bank_ref_data_row[transactionPaymentReferenceField]]
                             googleForm.at[i, paidAcknowledgedField] = float("nan")
                             rows_updated = rows_updated + 1
-                            break
+                            # break
                         else:
                             closestMatch = form_rows[closestMatchField]
+                            closestMatchRatioValue = form_rows[closestMatchRatioField]
                             if closestMatch == "" or pd.isna(closestMatch) or (
-                                    closestMatch != "" and fuzzyMatchRatio >= form_rows[closestMatchRatioField]):
+                                    closestMatch != "" and fuzzyMatchRatio >= closestMatchRatioValue):
                                 googleForm.at[i, closestMatchRatioField] = fuzzyMatchRatio
-                                googleForm.at[i, closestMatchField] = str(statement_row_value)
+                                googleForm.at[i, closestMatchField] = statment_row[
+                                    bank_ref_data_row[transactionPaymentReferenceField]]
                                 rows_updated = rows_updated + 1
 
         if rows_updated > 0:
