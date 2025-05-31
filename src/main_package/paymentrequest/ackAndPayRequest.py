@@ -52,7 +52,7 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
     # Now we iterate over our data to generate and send custom emails to each
     for i, person in form.iterrows():
         # Only Process if a Payment Ref has NOT been emailed!
-        if (person[acknowledgedField] == "" and person[cancelledField] != 'Cancelled'):
+        if (person[paymentRefField] == "" and person[cancelledField] != 'Cancelled'):
             emailValid, mesg = checkEmailIsValid(person[emailHeaderField])
             if not emailValid:
                 errorFile.write("email ID on Line" + str(i) + " is INVALID")
@@ -97,11 +97,11 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
             print(f"Sending email to {person[emailHeaderField]}:\n{email_content}\n\n")
             logFile.write(f"Sending email to {person[emailHeaderField]}:\n{email_content}\n\n")
 
-            sendSuccess = sendEmail(msg.as_string(), person[emailHeaderField], adminEmail, errorFile)
+            if person[acknowledgedField] == "":
+                sendSuccess = sendEmail(msg.as_string(), person[emailHeaderField], adminEmail, errorFile)
 
-            if (sendSuccess):
-                form.at[i, acknowledgedField] = currentDateTime
-                form.at[i, paymentRefField] = uniqueRef
+            form.at[i, acknowledgedField] = currentDateTime
+            form.at[i, paymentRefField] = uniqueRef
 
     with pd.ExcelWriter(processedXlsFile, engine="openpyxl",
                         mode="a", if_sheet_exists="replace") as writer:

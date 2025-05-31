@@ -46,45 +46,52 @@ def sendPayAck(templateName, processedXlsFile):
     subject = "Dance Beatz Charity Dance Show 2025"
     form.fillna(value="", axis=1, inplace=True)
 
-    # Now we iterate over our data to generate and send custom emails to each
-    for i, person in form.iterrows():
-        # Only Process if a Payment Ref has NOT been emailed!
-        if (person[acknowledgedField] != "" and person[cancelledField] != 'Cancelled' and person[
-            paidAmountField] != "" and person[paidDateField] != "" and person[paidAcknowledgedField] == ""):
-            emailValid, mesg = checkEmailIsValid(person[emailHeaderField])
-            if not emailValid:
-                errorFile.write("email ID on Line" + str(i) + " is INVALID")
-                continue
+    emails_sent = 0
 
-            formatted_payment = prependGBP(person[paidAmountField])
-            formatted_date = datetime.date(person[paidDateField]).strftime("%d/%m/%Y")
-            # Create email content using Jinja2 template
-            email_data = {
-                "guestName": person[guestNameField],
-                "PaidAmount": formatted_payment,
-                "PaidDate": formatted_date,
-                "PaymentRef": person[paymentRefField],
-            }
-            email_content = jinja_template.render(email_data)
+    try:
+        # Now we iterate over our data to generate and send custom emails to each
+        for i, person in form.iterrows():
+            # Only Process if a Payment Ref has NOT been emailed!
+            if (person[acknowledgedField] != "" and person[cancelledField] != 'Cancelled' and person[
+                paidAmountField] != "" and person[paidDateField] != "" and person[paidAcknowledgedField] == ""):
+                emailValid, mesg = checkEmailIsValid(person[emailHeaderField])
+                if not emailValid:
+                    errorFile.write("email ID on Line" + str(i) + " is INVALID")
+                    continue
 
-            # Create the email message
-            msg = MIMEMultipart()
-            msg["From"] = adminEmail
-            msg["To"] = person[emailHeaderField]
-            msg["Subject"] = subject
+                formatted_payment = prependGBP(person[paidAmountField])
+                formatted_date = datetime.date(person[paidDateField]).strftime("%d/%m/%Y")
+                # Create email content using Jinja2 template
+                email_data = {
+                    "guestName": person[guestNameField],
+                    "PaidAmount": formatted_payment,
+                    "PaidDate": formatted_date,
+                    "PaymentRef": person[paymentRefField],
+                }
+                email_content = jinja_template.render(email_data)
 
-            # Attach the HTML content to the email
-            msg.attach(MIMEText(email_content, "html"))
+                # Create the email message
+                msg = MIMEMultipart()
+                msg["From"] = adminEmail
+                msg["To"] = person[emailHeaderField]
+                msg["Subject"] = subject
 
-            # Print and send the email
-            print(f"Sending email to {person[emailHeaderField]}:\n{email_content}\n\n")
-            logFile.write(f"Sending email to {person[emailHeaderField]}:\n{email_content}\n\n")
+                # Attach the HTML content to the email
+                msg.attach(MIMEText(email_content, "html"))
 
-            sendSuccess = sendEmail(msg.as_string(), person[emailHeaderField], adminEmail, errorFile)
+                # Print and send the email
+                print(f"Sending email to {person[emailHeaderField]}:\n{email_content}\n\n")
+                logFile.write(f"Sending email to {person[emailHeaderField]}:\n{email_content}\n\n")
 
-            if (sendSuccess):
-                form.at[i, paidAcknowledgedField] = currentDateTime
+                sendSuccess = sendEmail(msg.as_string(), person[emailHeaderField], adminEmail, errorFile)
 
-    with pd.ExcelWriter(processedXlsFile, engine="openpyxl",
-                        mode="a", if_sheet_exists="replace") as writer:
-        form.to_excel(excel_writer=writer, sheet_name='Form Responses 1', index=False)
+                if (sendSuccess):
+                    form.at[i, paidAcknowledgedField] = currentDateTime
+                    emails_sent += 1
+    except Exception as e:
+        errorFile.write(str(e))
+
+    if emails_sent > 0:
+        with pd.ExcelWriter(processedXlsFile, engine="openpyxl",
+                            mode="a", if_sheet_exists="replace") as writer:
+            form.to_excel(excel_writer=writer, sheet_name='Form Responses 1', index=False)

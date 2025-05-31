@@ -7,7 +7,7 @@ from src.main_package.fileops.fileops import checkFileOpen
 def hasPaidCorrectAmount(**kwargs):
     paid = kwargs['totalPaid']
     toPay = (kwargs['adults'] * kwargs['adultTicketPrice']) + (
-            kwargs['kids'] * kwargs['kidsTicketPrice'])
+            kwargs['kids'] * kwargs['kidsTicketPrice']) + (kwargs['raffle'] * kwargs['raffleTicketPrice'])
     if paid > toPay:
         return "OverPaid"
     elif paid < toPay:
@@ -27,6 +27,8 @@ def find_and_update_bank_transactions(processedXlsFile, bank_ref_data, current_s
         fuzzyMatchField = 'FuzzyMatchRatio'
         adultTicketPriceField = 'AdultTicketPrice'
         kidsTicketPriceField = 'KidsTicketPrice'
+        raffleTicketPriceField = 'RafflePrice'
+        rafflePriceField = "I'd like to win one of the Great prizes on offer for the Raffle, please can I buy the following Number of tickets (£2 each)"
         noOfAdultsField = 'Number of Adults (£12)'
         noOfKidsField = 'Number of Children aged 5 and above (£6)'
         paymentMismatchField = 'PaymentMismatch'
@@ -38,6 +40,7 @@ def find_and_update_bank_transactions(processedXlsFile, bank_ref_data, current_s
         fuzzyMatchWanted = bank_ref_data[fuzzyMatchField][0]
         kidsTicketPrice = bank_ref_data[kidsTicketPriceField][0]
         adultTicketPrice = bank_ref_data[adultTicketPriceField][0]
+        rafflePrice = bank_ref_data[raffleTicketPriceField][0]
 
         googleForm = pd.read_excel(processedXlsFile)
         googleForm[totalPaidField].fillna(0)
@@ -75,6 +78,8 @@ def find_and_update_bank_transactions(processedXlsFile, bank_ref_data, current_s
                                 adultTicketPrice=adultTicketPrice,
                                 kids=form_rows[noOfKidsField],
                                 kidsTicketPrice=kidsTicketPrice,
+                                raffle=form_rows[rafflePriceField],
+                                raffleTicketPrice=rafflePrice,
                             )
                             googleForm.at[i, paidAmountField] = statementAmount
                             googleForm.at[i, paidDateField] = statementPaymentDate
@@ -101,4 +106,5 @@ def find_and_update_bank_transactions(processedXlsFile, bank_ref_data, current_s
                                 mode="a", if_sheet_exists="replace") as writer:
                 googleForm.to_excel(excel_writer=writer, sheet_name='Form Responses 1', index=False)
     except Exception as e:
+        print(e)
         errorFile.write(str(e))
