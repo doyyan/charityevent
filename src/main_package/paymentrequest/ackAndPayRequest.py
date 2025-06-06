@@ -45,7 +45,7 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
     subject = "Dance Beatz Charity Dance Show 2025"
     adultCost = 12
     kidsCost = 6
-    raffleCost = 1
+    raffleCost = 2
 
     form.fillna(value="", axis=1, inplace=True)
 
@@ -78,7 +78,7 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
                 "adultPrice": adultsPrice,
                 # "voluntaryPrice": voluntaryPrice,
                 "uniqueRef": uniqueRef,
-                "rafflePrice": person[raffleField],
+                "rafflePrice": raffle,
                 "kidsPrice": kidsPrice,
                 "totalPrice": totalPrice,
             }
