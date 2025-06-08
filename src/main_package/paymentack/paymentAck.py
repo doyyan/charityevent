@@ -53,7 +53,8 @@ def sendPayAck(templateName, processedXlsFile):
         for i, person in form.iterrows():
             # Only Process if a Payment Ref has NOT been emailed!
             if (person[acknowledgedField] != "" and person[cancelledField] != 'Cancelled' and person[
-                paidAmountField] != "" and person[paidDateField] != "" and person[paidAcknowledgedField] == ""):
+                paidAmountField] != "" and person[paidDateField] != "" and person[
+                paidAcknowledgedField] == ""):
                 emailValid, mesg = checkEmailIsValid(person[emailHeaderField])
                 if not emailValid:
                     errorFile.write("email ID on Line" + str(i) + " is INVALID")

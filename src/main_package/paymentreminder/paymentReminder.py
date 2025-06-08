@@ -12,7 +12,7 @@ from src.main_package.fileops.fileops import checkFileOpen
 from src.main_package.loggers.logger import createLogger
 
 
-def sendAckAndPayRequest(templateName, processedXlsFile):
+def sendPayReminder(templateName, processedXlsFile):
     currentDateTime = datetime.now()
     shutil.copy(processedXlsFile, '../mainExcelFiles/DanceBeatz2025ProcessedCopy'
                 + currentDateTime.strftime("%Y%m%d%H%M%S")
@@ -36,6 +36,10 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
     acknowledgedField = 'Acknowledged'
     cancelledField = 'Cancelled'
     paymentRefField = 'PaymentRef'
+    paidAmountField = 'PaidAmount'
+    paidAcknowledgedField = 'PaidAcknowledged'
+    paidDateField = 'PaidDate'
+    paymentReminderSent = 'PaymentReminderSent'
 
     # Read the Jinja2 email template
     with open(templateName, "r") as file:
@@ -52,7 +56,9 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
     # Now we iterate over our data to generate and send custom emails to each
     for i, person in form.iterrows():
         # Only Process if a Payment Ref has NOT been emailed!
-        if (person[paymentRefField] == "" and person[cancelledField] != 'Cancelled'):
+        if (person[paymentRefField] != "" and person[cancelledField] != 'Cancelled' and person[
+            paidAmountField] == "" and person[paidDateField] == "" and person[paidAcknowledgedField] == ""
+            and person[paymentReminderSent] == "") and person[acknowledgedField] != "":
             emailValid, mesg = checkEmailIsValid(person[emailHeaderField])
             if not emailValid:
                 errorFile.write("email ID on Line" + str(i) + " is INVALID")
@@ -63,9 +69,7 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
             raffle = person[raffleField] * raffleCost
             indexWithNameSlice = person[guestNameField].upper()[:2] + str(i)
             totalPrice = kidsPrice + adultsPrice + raffle  # + voluntaryPrice
-            uniqueRef = (indexWithNameSlice + "A" + str(person[noOfAdultsField]) + "K" + str(
-                person[noOfKidsField]) + "R" + str(
-                person[raffleField]))
+            uniqueRef = person[paymentRefField]
             #   +"V"+str(person["voluntaryPrice"]))
             # Create email content using Jinja2 template
             email_data = {
@@ -97,11 +101,10 @@ def sendAckAndPayRequest(templateName, processedXlsFile):
             print(f"Sending email to {person[emailHeaderField]}:\n{email_content}\n\n")
             logFile.write(f"Sending email to {person[emailHeaderField]}:\n{email_content}\n\n")
 
-            if person[acknowledgedField] == "":
+            if person[paymentReminderSent] == "":
                 sendSuccess = sendEmail(msg.as_string(), person[emailHeaderField], adminEmail, errorFile)
                 if sendSuccess:
-                    form.at[i, acknowledgedField] = currentDateTime
-                    form.at[i, paymentRefField] = uniqueRef
+                    form.at[i, paymentReminderSent] = currentDateTime
 
     with pd.ExcelWriter(processedXlsFile, engine="openpyxl",
                         mode="a", if_sheet_exists="replace") as writer:
