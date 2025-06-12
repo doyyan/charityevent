@@ -10,10 +10,9 @@ from jinja2 import Template
 from src.main_package.emailer.emailClient import sendEmail, checkEmailIsValid
 from src.main_package.fileops.fileops import checkFileOpen
 from src.main_package.loggers.logger import createLogger
-from src.main_package.utils.stringUtils import prependGBP
 
 
-def sendPayAck(templateName, processedXlsFile):
+def sendInfoPack(templateName, processedXlsFile):
     currentDateTime = datetime.now()
     shutil.copy(processedXlsFile, '../mainExcelFiles/DanceBeatz2025ProcessedCopy'
                 + currentDateTime.strftime("%Y%m%d%H%M%S")
@@ -34,16 +33,14 @@ def sendPayAck(templateName, processedXlsFile):
     acknowledgedField = 'Acknowledged'
     cancelledField = 'Cancelled'
     paymentRefField = 'PaymentRef'
-    paidAmountField = 'PaidAmount'
-    paidDateField = 'PaidDate'
-    paidAcknowledgedField = 'PaidAcknowledged'
+    infoPackSent = 'InfoPackSent'
 
     # Read the Jinja2 email template
     with open(templateName, "r") as file:
         template_str = file.read()
         jinja_template = Template(template_str)
 
-    subject = "Dance Beatz Charity Dance Show 2025"
+    subject = "Event Information for Dance Beatz Charity Dance Show 2025"
     form.fillna(value="", axis=1, inplace=True)
 
     emails_sent = 0
@@ -52,21 +49,16 @@ def sendPayAck(templateName, processedXlsFile):
         # Now we iterate over our data to generate and send custom emails to each
         for i, person in form.iterrows():
             # Only Process if a Payment Ref has NOT been emailed!
-            if (person[acknowledgedField] != "" and person[cancelledField] != 'Cancelled' and person[
-                paidAmountField] != "" and person[paidDateField] != "" and person[
-                paidAcknowledgedField] == ""):
+            if person[acknowledgedField] != "" and person[cancelledField] != 'Cancelled' and person[
+                infoPackSent] == "":
                 emailValid, mesg = checkEmailIsValid(person[emailHeaderField])
                 if not emailValid:
                     errorFile.write("email ID on Line" + str(i) + " is INVALID")
                     continue
 
-                formatted_payment = prependGBP(person[paidAmountField])
-                formatted_date = datetime.date(person[paidDateField]).strftime("%d/%m/%Y")
                 # Create email content using Jinja2 template
                 email_data = {
                     "guestName": person[guestNameField],
-                    "PaidAmount": formatted_payment,
-                    "PaidDate": formatted_date,
                     "PaymentRef": person[paymentRefField],
                 }
                 email_content = jinja_template.render(email_data)
@@ -85,11 +77,10 @@ def sendPayAck(templateName, processedXlsFile):
                 logFile.write(f"Sending email to {person[emailHeaderField]}:\n{email_content}\n\n")
 
                 sendSuccess = sendEmail(msg.as_string(), person[emailHeaderField], adminEmail, errorFile)
-
                 if (sendSuccess):
-                    form.at[i, paidAcknowledgedField] = currentDateTime
+                    form.at[i, infoPackSent] = currentDateTime
                     emails_sent += 1
-                    
+
     except Exception as e:
         errorFile.write(str(e))
 
